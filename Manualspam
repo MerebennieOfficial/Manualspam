@@ -1,0 +1,71 @@
+-- Get necessary services
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Players = game:GetService("Players")
+
+-- Local Player reference
+local Player = Players.LocalPlayer
+
+-- Variables to control the state of the auto-clicker
+local autoClickEnabled = false
+local clickInterval = 0.04  -- 40 milliseconds
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+-- Create the main frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 200, 0, 100)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+MainFrame.BackgroundColor3 = Color3.new(0, 0, 0)  -- Black background
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.new(1, 1, 1)  -- White border
+MainFrame.Parent = ScreenGui
+MainFrame.Active = true
+MainFrame.Draggable = true  -- Make the frame movable
+
+-- Create the On/Off button
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 180, 0, 50)
+ToggleButton.Position = UDim2.new(0.5, -90, 0.5, -25)
+ToggleButton.Text = "Auto Click: OFF"
+ToggleButton.TextColor3 = Color3.new(1, 1, 1)  -- White text
+ToggleButton.BackgroundColor3 = Color3.new(0, 0, 0)  -- Black background
+ToggleButton.BorderColor3 = Color3.new(1, 1, 1)  -- White border
+ToggleButton.Parent = MainFrame
+
+-- Function to toggle the auto-clicker
+local function toggleAutoClick()
+    autoClickEnabled = not autoClickEnabled
+    ToggleButton.Text = autoClickEnabled and "Auto Click: ON" or "Auto Click: OFF"
+end
+
+-- Connect the toggle function to the button click
+ToggleButton.MouseButton1Click:Connect(toggleAutoClick)
+
+-- Auto-clicker function
+RunService.Heartbeat:Connect(function()
+    if autoClickEnabled then
+        -- Simulate a left mouse button click at the center of the screen
+        VirtualInputManager:SendMouseButtonEvent(
+            workspace.CurrentCamera.ViewportSize.X / 2,
+            workspace.CurrentCamera.ViewportSize.Y / 2,
+            0,  -- 0 for left mouse button
+            true,  -- Button down
+            game,
+            0
+        )
+        VirtualInputManager:SendMouseButtonEvent(
+            workspace.CurrentCamera.ViewportSize.X / 2,
+            workspace.CurrentCamera.ViewportSize.Y / 2,
+            0,  -- 0 for left mouse button
+            false,  -- Button up
+            game,
+            0
+        )
+        wait(clickInterval)  -- Wait for click interval
+    end
+end)
